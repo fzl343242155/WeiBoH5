@@ -81,6 +81,12 @@ public class MessageService extends Service {
     public void onCreate() {
         super.onCreate();
         mContext = MessageService.this;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                startRotation();
+            }
+        }).start();
     }
 
     public static void sendData(String json) {
@@ -125,13 +131,15 @@ public class MessageService extends Service {
                             ProcessData(message);
                         }
                     };
+                }
                     try {
                         client.connectBlocking();
-                        startRotation();
+//                        startRotation();
                     } catch (Exception e) {
                         e.printStackTrace();
+                        client = null;
                     }
-                }
+//                }
             }
         }).start();
 
