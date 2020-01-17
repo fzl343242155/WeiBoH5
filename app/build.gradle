@@ -1,0 +1,101 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao' // apply plugin
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.0"
+    defaultConfig {
+        applicationId "com.turbo.weiboh5"
+        minSdkVersion 15
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    signingConfigs {
+        EnterpriseConfig {
+            storeFile file('mqbj.jks')
+            storePassword "mqbj123"
+            keyAlias "mqbj"
+            keyPassword "mqbj123"
+        }
+    }
+    buildTypes {
+        release {
+            zipAlignEnabled true
+            debuggable true
+            signingConfig signingConfigs.EnterpriseConfig
+            multiDexEnabled true
+        }
+
+        debug {
+            signingConfig signingConfigs.EnterpriseConfig
+            multiDexEnabled true
+            debuggable true
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    greendao{
+        schemaVersion 1
+        daoPackage 'com.greendao.gen'
+        targetGenDir 'src/main/java'
+    }
+
+    // 便利所有的Variants，all是迭代遍历操作符，相当于for
+    applicationVariants.all { variant ->// 遍历得出所有的variant
+        variant.outputs.all {// 遍历所有的输出类型，一般是debug和replease
+            // 定义apk的名字，拼接variant的版本号
+            def apkName = "WeiBoH5_${variant.versionName}"
+            // 判断是否为空
+            if (!variant.flavorName.isEmpty()) {
+                apkName += "_${variant.flavorName}"
+            }
+            // 赋值属性
+            String time = new Date().format("_yyyyMMdd_HH_mm_ss")
+            if (variant.buildType.name.equals("release")){
+                outputFileName = apkName + "_Replease" + time + ".apk"
+            }else {
+                outputFileName = apkName + "_Debug" +time + ".apk"
+            }
+
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    //网路请求模块
+    implementation 'io.reactivex:rxandroid:1.2.1'
+    implementation 'io.reactivex:rxjava:1.2.7'
+    implementation 'com.lzy.net:okrx:1.0.2'
+    implementation 'com.lzy.net:okserver:2.0.5'
+    implementation 'com.lzy.net:okgo:3.0.4'
+    //eventbus
+    implementation 'org.greenrobot:eventbus:3.0.0'
+    //butterknife
+    implementation 'com.jakewharton:butterknife:10.2.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
+    //gson
+    implementation 'com.google.code.gson:gson:2.8.5'
+    //permissions
+    implementation 'com.nabinbhandari.android:permissions:3.8'
+    //WebSocket
+    implementation 'org.java-websocket:Java-WebSocket:1.4.0'
+    //greendao
+    implementation 'org.greenrobot:greendao:3.2.2' // add library
+}
+
+
+
+

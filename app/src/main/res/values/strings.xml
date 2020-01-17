@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">WeiBoH5</string>
+
+    <string name="title1">需要获取(存储空间)和(设备信息)权限，已保证应用正常运行。</string>
+    <string name="setting">设置</string>
+    <string name="title2">在设置-应用-WeiBoH5-权限中开启。</string>
+    <string name="title3">权限申请</string>
+    <string name="title4">登录本软件</string>
+
+    <string name="touchsprite_loading">正在加载...</string>
+
+</resources>
