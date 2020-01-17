@@ -115,20 +115,22 @@ public class MessageService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                client = new JWebSocketClient(uri) {
-                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                    @Override
-                    public void onMessage(String message) {
-                        //message就是接收到的消息
-                        LogUtils.e(TAG, "接收到的消息 = " + message);
-                        ProcessData(message);
+                if (client == null) {
+                    client = new JWebSocketClient(uri) {
+                        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+                        @Override
+                        public void onMessage(String message) {
+                            //message就是接收到的消息
+                            LogUtils.e(TAG, "接收到的消息 = " + message);
+                            ProcessData(message);
+                        }
+                    };
+                    try {
+                        client.connectBlocking();
+                        startRotation();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                };
-                try {
-                    client.connectBlocking();
-                    startRotation();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
         }).start();

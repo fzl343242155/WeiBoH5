@@ -102,9 +102,6 @@ public class MainActivity extends Activity {
         mContext = MainActivity.this;
         ButterKnife.bind(this);
         init();
-
-        Intent intent = new Intent(mContext, MessageService.class);
-        startService(intent);
     }
 
     /**
@@ -131,6 +128,13 @@ public class MainActivity extends Activity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e(TAG, "onResume: " );
+        Intent intent = new Intent(mContext, MessageService.class);
+        startService(intent);
+    }
 
     private void init() {
         String name = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.CLIENT_USER);
