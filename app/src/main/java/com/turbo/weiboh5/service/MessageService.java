@@ -95,6 +95,7 @@ public class MessageService extends Service {
             client.send(json);
         } else {
             LogUtils.e(TAG, "sendData: client = null or client.isopen = false");
+            EventBus.getDefault().post(EnumUtils.EVENT_TYPE.SERVER_ERROR);
         }
     }
 
@@ -134,12 +135,11 @@ public class MessageService extends Service {
                 }
                     try {
                         client.connectBlocking();
-//                        startRotation();
                     } catch (Exception e) {
                         e.printStackTrace();
                         client = null;
                     }
-//                }
+
             }
         }).start();
 

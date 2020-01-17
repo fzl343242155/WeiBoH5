@@ -131,7 +131,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e(TAG, "onResume: " );
         Intent intent = new Intent(mContext, MessageService.class);
         startService(intent);
     }
@@ -464,10 +463,11 @@ public class MainActivity extends Activity {
                 break;
             case LOGIN_ERROR:
                 conned = false;
-                stringBuilder.append("登录失败\n");
+                stringBuilder.append("登录失败,名字重复,请重新输入名字\n");
                 setText(stringBuilder);
-                FileUtil.writeWBLogFile("登录失败\n");
+                FileUtil.writeWBLogFile("登录失败,名字重复,请重新输入名字\n");
                 setBtnType();
+                etName.setText("");
                 break;
             case UPLOAD_SUCCESS:
                 break;
