@@ -89,7 +89,6 @@ public class MessageService extends Service {
             client.send(json);
         } else {
             LogUtils.e(TAG, "sendData: client = null or client.isopen = false");
-//            EventBus.getDefault().post(EnumUtils.EVENT_TYPE.SERVER_ERROR);
         }
     }
 
@@ -231,12 +230,13 @@ public class MessageService extends Service {
                                     if (user2Bean.getData().isLogin()) {
                                         dataBean.setStatus("1");
                                         dataBean.setSt(user2Bean.getData().getSt());
+                                        onForward();
+                                        onFocus(weiboid);
                                     } else {
                                         dataBean.setStatus("0");
                                         dataBean.setSt("");
                                     }
                                     DataUtils.getInstance().update(dataBean);
-                                    onForward();
                                 }
                             }, new Action1<Throwable>() {
                                 @Override
@@ -254,6 +254,36 @@ public class MessageService extends Service {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 关注
+     *
+     * @param searchID
+     */
+    public static void onFocus(String searchID) {
+        String st = DataUtils.getInstance().getSt();
+        HttpServer.$().weibo_focus(searchID, st)
+                .observeOn(Schedulers.io())
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String text) {
+                        try {
+                            ForwardBean forwardBean = new Gson().fromJson(text, ForwardBean.class);
+                            if (forwardBean.getOk() == 1) {
+                                EventBus.getDefault().post(EnumUtils.EVENT_TYPE.FOCUS_SUCCESS);
+                            }
+                        } catch (Exception e) {
+
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+
+                    }
+                });
+    }
+
 
     private void onForward() {
         EventBus.getDefault().post(EnumUtils.FORWARD_TYPE.FORWARD_LOG_1);

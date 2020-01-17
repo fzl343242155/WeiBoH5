@@ -410,8 +410,8 @@ public class MainActivity extends Activity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(EnumUtils.EVENT_TYPE type) {
-        String current_user;
-        String user;
+        String current_user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.CURRENT_USER); //获取当前用户
+        String user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.FORWARD_USER); //获取当前用户
         SocketActionBean bean;
         String json;
         switch (type) {
@@ -426,13 +426,14 @@ public class MainActivity extends Activity {
             case SEARCH_SUCCESS:
                 break;
             case FOCUS_SUCCESS:
+                stringBuilder.append("关注成功\n");
+                setText(stringBuilder);
+                FileUtil.writeWBLogFile("关注成功\n");
                 break;
             case FORWARD_SUCCESS:
                 dismissWaiting();
                 index++;
                 tvNum.setText(index + "");
-                current_user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.CURRENT_USER); //获取当前用户
-                user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.FORWARD_USER); //获取当前用户
                 String log = current_user + " 成功转发 " + user + " 的第一条微博";
                 stringBuilder.append(log + "\n");
                 setText(stringBuilder);
@@ -448,8 +449,6 @@ public class MainActivity extends Activity {
             case FORWARD_ERROR:
                 dismissWaiting();
 
-                current_user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.CURRENT_USER); //获取当前用户
-                user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.FORWARD_USER); //获取当前用户
                 bean = new SocketActionBean();
                 bean.setAction("android_to_server_forward_fail");
                 bean.setAccount(current_user);
