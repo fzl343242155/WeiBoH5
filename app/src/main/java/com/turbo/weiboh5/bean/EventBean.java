@@ -8,6 +8,15 @@ package com.turbo.weiboh5.bean;
  */
 public class EventBean {
     private String msg;
+    private String errno;
+
+    public String getErrno() {
+        return errno;
+    }
+
+    public void setErrno(String errno) {
+        this.errno = errno;
+    }
 
     public String getMsg() {
         return msg;

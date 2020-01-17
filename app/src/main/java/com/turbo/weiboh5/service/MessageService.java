@@ -371,6 +371,7 @@ public class MessageService extends Service {
                                     getWeiboCode();
                                 } else {
                                     EventBean eventBean = new EventBean();
+                                    eventBean.setErrno(forwardBean.getErrno());
                                     eventBean.setMsg(forwardBean.getMsg());
                                     EventBus.getDefault().post(eventBean);
                                     EventBus.getDefault().post(EnumUtils.FORWARD_TYPE.FORWARD_LOG_10);
@@ -444,6 +445,7 @@ public class MessageService extends Service {
                         } else {
                             EventBus.getDefault().post(EnumUtils.FORWARD_TYPE.FORWARD_LOG_13);
                             EventBean eventBean = new EventBean();
+                            eventBean.setErrno("6");
                             eventBean.setMsg("打码平台余额不足，请充值");
                             EventBus.getDefault().post(eventBean);
                             return null;

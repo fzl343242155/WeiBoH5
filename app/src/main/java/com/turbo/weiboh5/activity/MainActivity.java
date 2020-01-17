@@ -158,6 +158,15 @@ public class MainActivity extends Activity {
     public void onEventMainThread(EventBean bean) {
         dismissWaiting();
         Toast.makeText(mContext, bean.getMsg(), Toast.LENGTH_SHORT).show();
+        String current_user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.CURRENT_USER); //获取当前用户
+        String user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.FORWARD_USER); //获取当前用户
+        SocketActionBean socketActionBean = new SocketActionBean();
+        socketActionBean.setAction("android_to_server_forward_fail");
+        socketActionBean.setAccount(current_user);
+        socketActionBean.setWeiboid(user);
+        socketActionBean.setError(bean.getErrno());
+        String json = new Gson().toJson(bean);
+        MessageService.sendData(json);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -287,14 +296,6 @@ public class MainActivity extends Activity {
                 stringBuilder.append("打码平台余额不足\n");
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("打码平台余额不足（log13）\n");
-
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("6");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
                 break;
             case FORWARD_LOG_14:
                 stringBuilder.append("开始获取打码平台结果\n");
