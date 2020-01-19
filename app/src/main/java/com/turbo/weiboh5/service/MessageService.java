@@ -133,12 +133,12 @@ public class MessageService extends Service {
                         }
                     };
                 }
-                    try {
-                        client.connectBlocking();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        client = null;
-                    }
+                try {
+                    client.connectBlocking();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    client = null;
+                }
 
             }
         }).start();
@@ -192,6 +192,12 @@ public class MessageService extends Service {
                     JSONObject data_d_object = jsonObject.getJSONObject("data");
                     String d_account = data_d_object.getString("account");
                     DataUtils.getInstance().delete(DataUtils.getInstance().getID(d_account));
+
+                    bean = new SocketActionBean();
+                    bean.setAction("android_to_server_deleteaccountok");
+                    bean.setAccount(d_account);
+                    MessageService.sendData(new Gson().toJson(bean));
+
                     break;
                 case "server_to_android_queryaccountlist": //查询所有微博号 返回一个列表
                     String pcid = jsonObject.getString("data");
@@ -213,56 +219,74 @@ public class MessageService extends Service {
                     MessageService.sendData(new Gson().toJson(bean));
                     break;
                 case "server_to_android_forward": //转发微博
-                    JSONObject data_f_object = jsonObject.getJSONObject("data");
-                    String f_account_n = data_f_object.getString("account");
-                    String forwardcontent_n = data_f_object.getString("forwardcontent");
-                    String weiboid_n = data_f_object.getString("weiboid");
-                    //存值
-                    SharedPreferencesUtils.getInstance(TurboApplication.getApp()).putSP(URLs.CURRENT_USER, f_account_n);
-                    SharedPreferencesUtils.getInstance(TurboApplication.getApp()).putSP(URLs.FORWARD_USER, weiboid_n);
-                    //通知界面 转圈
-                    EventBus.getDefault().post(EnumUtils.EVENT_TYPE.FORWARD_START);
+                    synchronized (this) {
+                        JSONObject data_f_object = jsonObject.getJSONObject("data");
+                        String f_account_n = data_f_object.getString("account");
+                        String forwardcontent_n = data_f_object.getString("forwardcontent");
+                        String weiboid_n = data_f_object.getString("weiboid");
+                        //存值
+                        SharedPreferencesUtils.getInstance(TurboApplication.getApp()).putSP(URLs.CURRENT_USER, f_account_n);
+                        SharedPreferencesUtils.getInstance(TurboApplication.getApp()).putSP(URLs.FORWARD_USER, weiboid_n);
+                        //通知界面 转圈
+                        EventBus.getDefault().post(EnumUtils.EVENT_TYPE.FORWARD_START);
 
-                    f_account = f_account_n;
-                    forwardcontent = forwardcontent_n;
-                    weiboid = weiboid_n;
-
-                    String cookies = DataUtils.getInstance().getCookie();
-                    //网络请求
-                    HttpServer.$().weibo_config(cookies)
-                            .subscribeOn(Schedulers.io())
-                            .subscribe(new Action1<String>() {
-                                @Override
-                                public void call(String text) {
-                                    LogUtils.e(TAG, "start_Timer: account = " + f_account_n + "     结果 = " + text);
-                                    User2Bean user2Bean = new Gson().fromJson(text, User2Bean.class);
-                                    DataBean dataBean = DataUtils.getInstance().select(DataUtils.getInstance().getID(f_account_n));
-                                    if (user2Bean.getData().isLogin()) {
-                                        dataBean.setStatus("1");
-                                        dataBean.setSt(user2Bean.getData().getSt());
-                                        onForward();
-                                        onFocus(weiboid);
-                                    } else {
-                                        dataBean.setStatus("0");
-                                        dataBean.setSt("");
-                                    }
-                                    DataUtils.getInstance().update(dataBean);
-                                }
-                            }, new Action1<Throwable>() {
-                                @Override
-                                public void call(Throwable throwable) {
-
-                                }
-                            });
+                        f_account = f_account_n;
+                        forwardcontent = forwardcontent_n;
+                        weiboid = weiboid_n;
+                        try {
+                            DataUtils.getInstance().getCookie();
+                            startForward();
+                        } catch (Exception e) {
+                            bean = new SocketActionBean();
+                            bean.setAction("android_to_server_forward_fail");
+                            bean.setAccount(f_account_n);
+                            bean.setWeiboid(weiboid_n);
+                            bean.setError("14");
+                            json = new Gson().toJson(bean);
+                            MessageService.sendData(json);
+                            EventBus.getDefault().post(EnumUtils.EVENT_TYPE.FORWARD_ERROR);
+                        }
 
 
+                    }
                     break;
             }
-
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 开始转发
+     */
+    private void startForward() {
+        String cookies = DataUtils.getInstance().getCookie();
+        //网络请求
+        HttpServer.$().weibo_config(cookies)
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String text) {
+                        LogUtils.e(TAG, "start_Timer: account = " + f_account + "     结果 = " + text);
+                        User2Bean user2Bean = new Gson().fromJson(text, User2Bean.class);
+                        DataBean dataBean = DataUtils.getInstance().select(DataUtils.getInstance().getID(f_account));
+                        if (user2Bean.getData().isLogin()) {
+                            dataBean.setStatus("1");
+                            dataBean.setSt(user2Bean.getData().getSt());
+                            onForward();
+                            onFocus(weiboid);
+                        } else {
+                            dataBean.setStatus("0");
+                            dataBean.setSt("");
+                        }
+                        DataUtils.getInstance().update(dataBean);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        EventBus.getDefault().post(EnumUtils.EVENT_TYPE.FORWARD_ERROR);
+                    }
+                });
     }
 
     /**
@@ -270,7 +294,7 @@ public class MessageService extends Service {
      *
      * @param searchID
      */
-    public static void onFocus(String searchID) {
+    public void onFocus(String searchID) {
         String st = DataUtils.getInstance().getSt();
         HttpServer.$().weibo_focus(searchID, st)
                 .observeOn(Schedulers.io())
@@ -289,7 +313,7 @@ public class MessageService extends Service {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-
+                        EventBus.getDefault().post(EnumUtils.EVENT_TYPE.FORWARD_ERROR);
                     }
                 });
     }
