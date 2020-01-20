@@ -9,8 +9,8 @@ package com.turbo.weiboh5;
 public class URLs {
 
     //-----------------------------------websocket-----------------------------------//
-    public static final String SOCKET_URL = "ws://192.168.40.17:10020/websocket";
-//    public static final String SOCKET_URL = "ws://gatewaynew.bflyzx.com:10020/websocket";
+//    public static final String SOCKET_URL = "ws://192.168.40.17:10020/websocket";
+    public static final String SOCKET_URL = "ws://gatewaynew.bflyzx.com:10020/websocket";
 
     //-----------------------------------微博-----------------------------------//
     public static final String WEIBO_CONFIG_URL = "https://m.weibo.cn/api/config";

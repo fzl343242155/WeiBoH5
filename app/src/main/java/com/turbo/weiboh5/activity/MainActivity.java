@@ -29,6 +29,7 @@ import com.turbo.weiboh5.URLs;
 import com.turbo.weiboh5.adapter.UserAdapter;
 import com.turbo.weiboh5.bean.DataBean;
 import com.turbo.weiboh5.bean.EventBean;
+import com.turbo.weiboh5.bean.ForwardBean;
 import com.turbo.weiboh5.bean.KeyBean;
 import com.turbo.weiboh5.bean.SocketActionBean;
 import com.turbo.weiboh5.service.MessageService;
@@ -173,6 +174,15 @@ public class MainActivity extends Activity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(ForwardBean bean) {
+        dismissWaiting();
+        String weiboID = bean.getMsg();
+        stringBuilder.append("该号 " + weiboID + " 没有一条微博\n");
+        setText(stringBuilder);
+        FileUtil.writeWBLogFile("该号 " + weiboID + "没有一条微博（log2-2）\n");
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(EnumUtils.FORWARD_TYPE type) {
         switch (type) {
             case FORWARD_LOG_1:
@@ -190,13 +200,6 @@ public class MainActivity extends Activity {
                 stringBuilder.append("根据ID没有搜到结果\n");
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("根据ID没有搜到结果（log2-1）\n");
-                break;
-            case FORWARD_LOG_2_2:
-                dismissWaiting();
-                String weiboID = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.FORWARD_USER);
-                stringBuilder.append("该号 " + weiboID + " 没有一条微博\n");
-                setText(stringBuilder);
-                FileUtil.writeWBLogFile("该号 " + weiboID + "没有一条微博（log2-2）\n");
                 break;
             case FORWARD_LOG_3:
                 stringBuilder.append("根据搜索结果获取重要参数成功\n");

@@ -51,7 +51,7 @@ public class WeiBoUtils {
 
     private static final String TAG = "WeiBoUtils";
 
-    public WeiBoUtils(String account, String forwardContent, String weiBoID,String id) {
+    public WeiBoUtils(String account, String forwardContent, String weiBoID, String id) {
         this.account = account;
         this.forwardContent = forwardContent;
         this.weiBoID = weiBoID;
@@ -136,7 +136,9 @@ public class WeiBoUtils {
                                     mFile = new File(pic_path);
                                 } else {
                                     //该人没有微博
-                                    EventBus.getDefault().post(EnumUtils.FORWARD_TYPE.FORWARD_LOG_2_2);
+                                    ForwardBean forwardBean = new ForwardBean();
+                                    forwardBean.setMsg(weiBoID);
+                                    EventBus.getDefault().post(forwardBean);
                                     sendWebSocketData(false, "5");
                                     return;
                                 }
