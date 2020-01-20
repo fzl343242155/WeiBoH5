@@ -29,6 +29,7 @@ import com.turbo.weiboh5.URLs;
 import com.turbo.weiboh5.adapter.UserAdapter;
 import com.turbo.weiboh5.bean.DataBean;
 import com.turbo.weiboh5.bean.EventBean;
+import com.turbo.weiboh5.bean.KeyBean;
 import com.turbo.weiboh5.bean.SocketActionBean;
 import com.turbo.weiboh5.service.MessageService;
 import com.turbo.weiboh5.utils.DataUtils;
@@ -85,7 +86,6 @@ public class MainActivity extends Activity {
     public static final int RC_CHOOSE_PHOTO = 2;
     private String name;
     private boolean conned = true;
-    private int conn_num = 0;
     private Timer timer = null;
     private boolean ManualStop = true;
 
@@ -159,25 +159,21 @@ public class MainActivity extends Activity {
     public void onEventMainThread(EventBean bean) {
         dismissWaiting();
         Toast.makeText(mContext, bean.getMsg(), Toast.LENGTH_SHORT).show();
-        String current_user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.CURRENT_USER); //获取当前用户
-        String user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.FORWARD_USER); //获取当前用户
-        SocketActionBean socketActionBean = new SocketActionBean();
-        socketActionBean.setAction("android_to_server_forward_fail");
-        socketActionBean.setAccount(current_user);
-        socketActionBean.setWeiboid(user);
-        socketActionBean.setError(bean.getErrno());
-        String json = new Gson().toJson(bean);
-        MessageService.sendData(json);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(KeyBean bean) {
+        dismissWaiting();
+        index++;
+        tvNum.setText(index + "");
+        String log = bean.getAccount() + " 成功转发 " + bean.getStatus() + " 的第一条微博";
+        stringBuilder.append(log + "\n");
+        setText(stringBuilder);
+        FileUtil.writeWBLogFile(log);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(EnumUtils.FORWARD_TYPE type) {
-
-        String current_user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.CURRENT_USER); //获取当前用户
-        String user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.FORWARD_USER); //获取当前用户
-        SocketActionBean bean;
-        String json;
-
         switch (type) {
             case FORWARD_LOG_1:
                 stringBuilder.append("开始转发微博\n");
@@ -194,14 +190,6 @@ public class MainActivity extends Activity {
                 stringBuilder.append("根据ID没有搜到结果\n");
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("根据ID没有搜到结果（log2-1）\n");
-
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("2");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
                 break;
             case FORWARD_LOG_2_2:
                 dismissWaiting();
@@ -209,14 +197,6 @@ public class MainActivity extends Activity {
                 stringBuilder.append("该号 " + weiboID + " 没有一条微博\n");
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("该号 " + weiboID + "没有一条微博（log2-2）\n");
-
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("5");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
                 break;
             case FORWARD_LOG_3:
                 stringBuilder.append("根据搜索结果获取重要参数成功\n");
@@ -233,13 +213,6 @@ public class MainActivity extends Activity {
                 stringBuilder.append("该手机没有读写sd卡权限\n");
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("该手机没有读写sd卡权限（log4-1）\n");
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("13");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
                 break;
             case FORWARD_LOG_5:
                 stringBuilder.append("上传成功，获取图片ID地址\n");
@@ -283,14 +256,6 @@ public class MainActivity extends Activity {
                 stringBuilder.append("验证码获取失败\n");
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("验证码获取失败（log12）\n");
-
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("3");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
                 break;
             case FORWARD_LOG_13:
                 dismissWaiting();
@@ -308,13 +273,6 @@ public class MainActivity extends Activity {
                 stringBuilder.append("打码失败\n");
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("打码失败（log15）\n");
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("7");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
                 break;
             case FORWARD_LOG_16:
                 stringBuilder.append("打码成功\n");
@@ -326,85 +284,17 @@ public class MainActivity extends Activity {
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("再次执行转发任务（log17）\n");
                 break;
-            case FORWARD_LOG_18:
-                break;
-            case FORWARD_LOG_19:
-                dismissWaiting();
-                stringBuilder.append("转发失败\n");
-                setText(stringBuilder);
-                FileUtil.writeWBLogFile("转发失败（log19）\n");
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("4");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
-                break;
-            case FORWARD_LOG_20:
-                dismissWaiting();
-                stringBuilder.append("转发结果解析异常\n");
-                setText(stringBuilder);
-                FileUtil.writeWBLogFile("转发结果解析异常（log20）\n");
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("8");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
-                break;
-            case FORWARD_LOG_21:
-                dismissWaiting();
-                stringBuilder.append("转发网络问题\n");
-                setText(stringBuilder);
-                FileUtil.writeWBLogFile("转发网络问题（log21）\n");
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("9");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
-                break;
             case FORWARD_LOG_22:
                 dismissWaiting();
                 stringBuilder.append("打码接口网络问题\n");
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("打码接口网络问题（log22）\n");
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("10");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
                 break;
             case FORWARD_LOG_23:
                 dismissWaiting();
                 stringBuilder.append("获取验证码接口网络问题\n");
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("获取验证码接口网络问题（log23）\n");
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("11");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
-                break;
-            case FORWARD_LOG_24:
-                dismissWaiting();
-                stringBuilder.append("搜索 传图 转发 网络问题\n");
-                setText(stringBuilder);
-                FileUtil.writeWBLogFile("搜索 传图 转发 网络问题（log24）\n");
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("12");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
                 break;
         }
 
@@ -412,10 +302,6 @@ public class MainActivity extends Activity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(EnumUtils.EVENT_TYPE type) {
-        String current_user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.CURRENT_USER); //获取当前用户
-        String user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.FORWARD_USER); //获取当前用户
-        SocketActionBean bean;
-        String json;
         switch (type) {
             case LOGIN_SUCCESS:
                 conned = true;
@@ -425,39 +311,13 @@ public class MainActivity extends Activity {
                 FileUtil.writeWBLogFile("登录成功\n");
                 setBtnType();
                 break;
-            case SEARCH_SUCCESS:
-                break;
             case FOCUS_SUCCESS:
                 stringBuilder.append("关注成功\n");
                 setText(stringBuilder);
                 FileUtil.writeWBLogFile("关注成功\n");
                 break;
-            case FORWARD_SUCCESS:
-                dismissWaiting();
-                index++;
-                tvNum.setText(index + "");
-                String log = current_user + " 成功转发 " + user + " 的第一条微博";
-                stringBuilder.append(log + "\n");
-                setText(stringBuilder);
-                FileUtil.writeWBLogFile(log);
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forwardok");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
-                break;
             case FORWARD_ERROR:
                 dismissWaiting();
-
-                bean = new SocketActionBean();
-                bean.setAction("android_to_server_forward_fail");
-                bean.setAccount(current_user);
-                bean.setWeiboid(user);
-                bean.setError("4");
-                json = new Gson().toJson(bean);
-                MessageService.sendData(json);
                 break;
             case LOGIN_ERROR:
                 conned = false;
@@ -466,10 +326,6 @@ public class MainActivity extends Activity {
                 FileUtil.writeWBLogFile("登录失败,名字重复,请重新输入名字\n");
                 setBtnType();
                 etName.setText("");
-                break;
-            case UPLOAD_SUCCESS:
-                break;
-            case CODE:
                 break;
             case REFRESH_DATA:
                 List<DataBean> list = DataUtils.getInstance().selectAll();

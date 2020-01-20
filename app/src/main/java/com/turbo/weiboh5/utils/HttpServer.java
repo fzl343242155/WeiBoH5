@@ -65,8 +65,7 @@ public class HttpServer {
      * @param st
      * @return
      */
-    public Observable<String> weibo_focus(String uid, String st) {
-        String cookie = DataUtils.getInstance().getCookie();
+    public Observable<String> weibo_focus(String uid, String st,String cookie) {
         return OkGo.<String>post(URLs.WEIBO_FOCUS_URL)
                 .headers("Origin", "https://m.weibo.cn")
                 .headers("Host", "m.weibo.cn")
@@ -89,8 +88,7 @@ public class HttpServer {
      *
      * @return
      */
-    public Observable<String> weibo_uploadPic(String id, String st, File file) {
-        String cookie = DataUtils.getInstance().getCookie();
+    public Observable<String> weibo_uploadPic(String id, String st, File file,String cookie) {
         return OkGo.<String>post(URLs.WEIBO_UPLOADPIC_URL)
                 .headers("Accept", "*/*")
                 .headers("Accept-Encoding", "gzip, deflate, br")
@@ -116,8 +114,7 @@ public class HttpServer {
      *
      * @return
      */
-    public Observable<String> weibo_forward(String id, String st, String content, String picid, String code) {
-        String cookie = DataUtils.getInstance().getCookie();
+    public Observable<String> weibo_forward(String id, String st, String content, String picid, String code,String cookie) {
         return OkGo.<String>post(URLs.WEIBO_FORWARD_URL)
                 .headers("Accept", "*/*")
                 .headers("Accept-Encoding", "gzip, deflate, br")
