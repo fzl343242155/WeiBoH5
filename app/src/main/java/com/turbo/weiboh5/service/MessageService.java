@@ -244,7 +244,7 @@ public class MessageService extends Service {
                             bean.setError("14");
                             json = new Gson().toJson(bean);
                             MessageService.sendData(json);
-                            EventBus.getDefault().post(EnumUtils.EVENT_TYPE.FORWARD_ERROR);
+                            EventBus.getDefault().post(EnumUtils.EVENT_TYPE.DISMISSWAITING);
                         }
 
 
