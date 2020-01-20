@@ -32,6 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -192,13 +194,14 @@ public class MessageService extends Service {
                     String f_account_n = data_f_object.getString("account");
                     String forwardcontent_n = data_f_object.getString("forwardcontent");
                     String weiboid_n = data_f_object.getString("weiboid");
-                    new Thread(new Runnable() {
+                    ExecutorService executorService = Executors.newCachedThreadPool();//创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。
+                    executorService.execute(new Runnable() {
                         @Override
                         public void run() {
                             WeiBoUtils weiBoUtils = new WeiBoUtils(f_account_n, forwardcontent_n, weiboid_n);
                             weiBoUtils.onForward();
                         }
-                    }).start();
+                    });
                     break;
             }
         } catch (JSONException e) {
