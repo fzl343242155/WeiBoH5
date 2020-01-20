@@ -62,13 +62,6 @@ public class DataUtils {
     }
 
     /**
-     * 删除全部数据
-     */
-    public void deleteAll() {
-        dataBeanDao.deleteAll();
-    }
-
-    /**
      * 修改其中I一条的数据
      *
      * @param dataBean
@@ -94,31 +87,6 @@ public class DataUtils {
      */
     public List<DataBean> selectAll() {
         return dataBeanDao.loadAll();
-    }
-
-    /**
-     * 获取当前账号的cookie
-     *
-     * @return
-     */
-    public String getCookie() {
-        String user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.CURRENT_USER); //获取当前用户
-        DataBean dataBean = DataUtils.getInstance().select(DataUtils.getInstance().getID(user));
-        String cookie = dataBean.getCookie();
-        return cookie;
-    }
-
-
-    /**
-     * 获取当前账号的st
-     *
-     * @return
-     */
-    public String getSt() {
-        String user = SharedPreferencesUtils.getInstance(TurboApplication.getApp()).getSP(URLs.CURRENT_USER); //获取当前用户
-        DataBean dataBean = DataUtils.getInstance().select(DataUtils.getInstance().getID(user));
-        String st = dataBean.getSt();
-        return st;
     }
 
     /**

@@ -169,6 +169,9 @@ public class MessageService extends Service {
                     bean.setAction("android_to_server_deleteaccountok");
                     bean.setAccount(d_account);
                     MessageService.sendData(new Gson().toJson(bean));
+
+                    // 通知界面刷新
+                    EventBus.getDefault().post(EnumUtils.EVENT_TYPE.REFRESH_DATA);
                     break;
                 case "server_to_android_queryaccountlist": //查询所有微博号 返回一个列表
                     String pcid = jsonObject.getString("data");
@@ -194,11 +197,12 @@ public class MessageService extends Service {
                     String f_account_n = data_f_object.getString("account");
                     String forwardcontent_n = data_f_object.getString("forwardcontent");
                     String weiboid_n = data_f_object.getString("weiboid");
+                    String id_n = data_f_object.getString("id");
                     ExecutorService executorService = Executors.newCachedThreadPool();//创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。
                     executorService.execute(new Runnable() {
                         @Override
                         public void run() {
-                            WeiBoUtils weiBoUtils = new WeiBoUtils(f_account_n, forwardcontent_n, weiboid_n);
+                            WeiBoUtils weiBoUtils = new WeiBoUtils(f_account_n, forwardcontent_n, weiboid_n,id_n);
                             weiBoUtils.onForward();
                         }
                     });

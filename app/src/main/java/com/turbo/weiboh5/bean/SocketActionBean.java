@@ -16,6 +16,7 @@ public class SocketActionBean {
     private String account;
     private String pcid;
     private String weiboid;
+    private String id;
     private String error;
     private List<KeyBean> data;
 
@@ -81,5 +82,13 @@ public class SocketActionBean {
 
     public void setError(String error) {
         this.error = error;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

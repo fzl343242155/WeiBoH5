@@ -2,7 +2,6 @@ package com.turbo.weiboh5.utils;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
@@ -48,13 +47,15 @@ public class WeiBoUtils {
     private String user_mid;
     private String user_st;
     private String upload_pic_id;
+    private String service_id;
 
     private static final String TAG = "WeiBoUtils";
 
-    public WeiBoUtils(String account, String forwardContent, String weiBoID) {
+    public WeiBoUtils(String account, String forwardContent, String weiBoID,String id) {
         this.account = account;
         this.forwardContent = forwardContent;
         this.weiBoID = weiBoID;
+        this.service_id = id;
     }
 
     public void onForward() {
@@ -413,6 +414,7 @@ public class WeiBoUtils {
             bean.setError(num[0]);
         }
         bean.setAccount(account);
+        bean.setId(service_id);
         bean.setWeiboid(weiBoID);
         String json = new Gson().toJson(bean);
         MessageService.sendData(json);
